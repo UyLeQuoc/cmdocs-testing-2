@@ -1,0 +1,154 @@
+---
+title: Caching
+description: How Next.js caches data and how to control revalidation.
+---
+
+# Caching
+
+Next.js caches rendering work and data requests to improve performance. This page covers how caching works and how to control it.
+
+## Caching overview
+
+<Mermaid chart="graph LR;
+    A[Request] --> B{Cache hit?};
+    B -->|Yes| C[Return cached];
+    B -->|No| D[Fetch fresh data];
+    D --> E[Store in cache];
+    E --> C;" />
+
+Next.js has four caching layers:
+
+| Layer | What it caches | Where | Duration |
+|---|---|---|---|
+| **Request Memoization** | Duplicate `fetch` calls in a single render | Server | Per-request |
+| **Data Cache** | `fetch` responses | Server | Persistent (revalidatable) |
+| **Full Route Cache** | Rendered HTML and RSC payload | Server | Persistent (revalidatable) |
+| **Router Cache** | RSC payload for visited routes | Client | Session-based |
+
+## Controlling the Data Cache
+
+### Time-based revalidation
+
+Refetch data after a set interval:
+
+```tsx
+// Revalidate every 60 seconds
+const res = await fetch('https://api.example.com/data', {
+  next: { revalidate: 60 },
+})
+```
+
+Or set it for all fetches on a page:
+
+```tsx title="app/posts/page.tsx"
+export const revalidate = 60 // seconds
+```
+
+### On-demand revalidation
+
+Revalidate when something changes (e.g., content updated in a CMS):
+
+<Tabs items={["revalidatePath", "revalidateTag"]}>
+  <Tab value="revalidatePath">
+    ```tsx title="app/api/revalidate/route.ts"
+    import { revalidatePath } from 'next/cache'
+
+    export async function POST() {
+      revalidatePath('/posts')
+      return Response.json({ revalidated: true })
+    }
+    ```
+  </Tab>
+  <Tab value="revalidateTag">
+    Tag fetches, then revalidate by tag:
+
+    ```tsx title="app/posts/page.tsx"
+    const res = await fetch('https://api.example.com/posts', {
+      next: { tags: ['posts'] },
+    })
+    ```
+
+    ```tsx title="app/api/revalidate/route.ts"
+    import { revalidateTag } from 'next/cache'
+
+    export async function POST() {
+      revalidateTag('posts')
+      return Response.json({ revalidated: true })
+    }
+    ```
+  </Tab>
+</Tabs>
+
+### Opting out of caching
+
+```tsx
+// Never cache this request
+const res = await fetch('https://api.example.com/data', {
+  cache: 'no-store',
+})
+```
+
+Or for the entire route segment:
+
+```tsx title="app/dashboard/page.tsx"
+export const dynamic = 'force-dynamic'
+```
+
+## Fetch options reference
+
+<TypeTable
+  type={{
+    cache: {
+      type: "'force-cache' | 'no-store'",
+      description: "Controls caching behavior. 'force-cache' (default) caches the response. 'no-store' skips the cache entirely.",
+      default: "'force-cache'",
+    },
+    "next.revalidate": {
+      type: "number | false",
+      description: "Time in seconds to cache the response. Set to false to cache indefinitely. Set to 0 to prevent caching.",
+    },
+    "next.tags": {
+      type: "string[]",
+      description: "Tag the cache entry for on-demand revalidation with revalidateTag().",
+    },
+  }}
+/>
+
+## Route segment options
+
+<TypeTable
+  type={{
+    revalidate: {
+      type: "number | false",
+      description: "Default revalidation time for all fetch requests in this segment.",
+      default: "false",
+    },
+    dynamic: {
+      type: "'auto' | 'force-dynamic' | 'error' | 'force-static'",
+      description: "Controls dynamic rendering behavior for the segment.",
+      default: "'auto'",
+    },
+    fetchCache: {
+      type: "'auto' | 'default-cache' | 'only-cache' | 'force-cache' | 'default-no-store' | 'only-no-store' | 'force-no-store'",
+      description: "Override the default caching behavior for all fetch requests in a segment.",
+      default: "'auto'",
+    },
+  }}
+/>
+
+## Cache behavior summary
+
+<Accordions>
+  <Accordion title="When is data cached by default?">
+    `fetch` responses are cached by default in Next.js when using `force-cache` (the default). Data is cached on the server and reused across requests until you explicitly revalidate.
+  </Accordion>
+  <Accordion title="How do I make a page fully dynamic?">
+    Add `export const dynamic = 'force-dynamic'` to the page, or use `cache: 'no-store'` on individual fetches. This opts out of all caching for that route.
+  </Accordion>
+  <Accordion title="What's the difference between revalidatePath and revalidateTag?">
+    `revalidatePath` purges the cache for a specific URL path. `revalidateTag` purges all cache entries tagged with a specific string — useful when the same data appears on multiple pages.
+  </Accordion>
+  <Accordion title="Does the Router Cache persist across page refreshes?">
+    No. The Router Cache is an in-memory, client-side cache that only lasts for the browser session. A hard refresh clears it.
+  </Accordion>
+</Accordions>

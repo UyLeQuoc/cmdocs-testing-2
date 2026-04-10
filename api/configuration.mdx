@@ -1,0 +1,200 @@
+---
+title: Configuration
+description: Configure Next.js with next.config.ts.
+---
+
+# Configuration
+
+Configure Next.js behavior through the `next.config.ts` file in the root of your project.
+
+## Basic config
+
+```ts title="next.config.ts"
+import type { NextConfig } from 'next'
+
+const nextConfig: NextConfig = {
+  // your options here
+}
+
+export default nextConfig
+```
+
+## Common options
+
+<TypeTable
+  type={{
+    reactStrictMode: {
+      type: "boolean",
+      description: "Enable React Strict Mode for highlighting potential problems.",
+      default: "true",
+    },
+    images: {
+      type: "ImageConfig",
+      description: "Configure the Image Optimization API. Set allowed remote domains and loader behavior.",
+    },
+    redirects: {
+      type: "() => Promise<Redirect[]>",
+      description: "Define URL redirects. Runs at request time before rendering.",
+    },
+    rewrites: {
+      type: "() => Promise<Rewrite[]>",
+      description: "Map incoming requests to different destinations without changing the URL.",
+    },
+    env: {
+      type: "Record<string, string>",
+      description: "Expose environment variables to the browser. Use NEXT_PUBLIC_ prefix instead for new projects.",
+    },
+    basePath: {
+      type: "string",
+      description: "Deploy under a sub-path of a domain. For example, /docs would serve the app at example.com/docs.",
+      default: "''",
+    },
+    trailingSlash: {
+      type: "boolean",
+      description: "Whether pages have trailing slashes. /about vs /about/.",
+      default: "false",
+    },
+    output: {
+      type: "'standalone' | 'export'",
+      description: "Output mode. 'standalone' for Docker. 'export' for static HTML.",
+    },
+  }}
+/>
+
+## Image optimization
+
+Configure remote image domains:
+
+```ts title="next.config.ts"
+import type { NextConfig } from 'next'
+
+const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn.example.com',
+        pathname: '/images/**',
+      },
+    ],
+  },
+}
+
+export default nextConfig
+```
+
+## Redirects and rewrites
+
+<Tabs items={["Redirects", "Rewrites"]}>
+  <Tab value="Redirects">
+    ```ts title="next.config.ts"
+    const nextConfig: NextConfig = {
+      async redirects() {
+        return [
+          {
+            source: '/old-blog/:slug',
+            destination: '/blog/:slug',
+            permanent: true,
+          },
+          {
+            source: '/docs',
+            destination: '/documentation',
+            permanent: false,
+          },
+        ]
+      },
+    }
+    ```
+  </Tab>
+  <Tab value="Rewrites">
+    ```ts title="next.config.ts"
+    const nextConfig: NextConfig = {
+      async rewrites() {
+        return [
+          {
+            source: '/api/:path*',
+            destination: 'https://api.example.com/:path*',
+          },
+        ]
+      },
+    }
+    ```
+
+    <Callout type="info">
+      Rewrites act as a proxy — the URL stays the same but the content comes from a different source. Great for migrating APIs incrementally.
+    </Callout>
+  </Tab>
+</Tabs>
+
+## Environment variables
+
+Next.js has built-in support for `.env` files:
+
+<Files>
+  <Folder name="my-app" defaultOpen>
+    <File name=".env" />
+    <File name=".env.local" />
+    <File name=".env.development" />
+    <File name=".env.production" />
+  </Folder>
+</Files>
+
+| File | When loaded | Git tracked? |
+|---|---|---|
+| `.env` | All environments | ✅ Yes |
+| `.env.local` | All environments (overrides `.env`) | ❌ No |
+| `.env.development` | `next dev` only | ✅ Yes |
+| `.env.production` | `next build` / `next start` only | ✅ Yes |
+
+<Callout type="warn">
+  Only variables prefixed with `NEXT_PUBLIC_` are exposed to the browser. All other env vars are server-only and will be `undefined` in Client Components.
+</Callout>
+
+```bash title=".env.local"
+# Server-only — available in Server Components, Route Handlers, middleware
+DATABASE_URL="postgresql://localhost:5432/mydb"
+API_SECRET="sk-secret-key"
+
+# Browser-accessible — available everywhere
+NEXT_PUBLIC_APP_URL="https://myapp.com"
+NEXT_PUBLIC_ANALYTICS_ID="UA-123456"
+```
+
+```tsx title="app/page.tsx"
+// ✅ Server Component — can access server-only vars
+const dbUrl = process.env.DATABASE_URL
+
+// ✅ Available everywhere
+const appUrl = process.env.NEXT_PUBLIC_APP_URL
+```
+
+## TypeScript config
+
+Next.js generates a `tsconfig.json` with recommended defaults:
+
+```json title="tsconfig.json"
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "jsx": "preserve",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "paths": {
+      "@/*": ["./*"]
+    },
+    "strict": true
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules"]
+}
+```
+
+<Callout type="info">
+  The `@/*` path alias is configured by default. Import from `@/app/components/button` instead of `../../../components/button`.
+</Callout>

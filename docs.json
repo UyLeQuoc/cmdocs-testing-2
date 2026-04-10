@@ -1,53 +1,60 @@
 {
   "$schema": "https://dev.cmdocs.sh/schema/docs.json",
-  "name": "My Documentation",
-  "description": "Built with cmdocs",
+  "name": "Next.js",
+  "description": "The React framework for production — build full-stack web applications with ease",
   "favicon": "/favicon.svg",
+  "seo": {
+    "title": "Next.js Documentation",
+    "titleTemplate": "%s — Next.js Docs",
+    "description": "Learn how to build full-stack web applications with Next.js, the React framework for production.",
+    "ogImage": "https://nextjs.org/api/docs-og"
+  },
   "theme": {
-    "preset": "neutral",
-    "colors": {
-      "primary": "#2563EB"
-    },
+    "preset": "ocean",
     "darkMode": true,
     "breadcrumb": true,
     "lastUpdated": true
   },
-  "seo": {
-    "title": "My Documentation",
-    "titleTemplate": "%s — My Docs",
-    "description": "Documentation built with cmdocs"
-  },
   "navbar": {
-    "title": "My Docs",
+    "title": "Next.js",
     "logo": {
-      "light": "/logo/light-logo-only.svg",
-      "dark": "/logo/dark-logo-only.svg",
+      "light": "/logo-light.svg",
+      "dark": "/logo-dark.svg",
       "display": "brand-name-and-logo"
     },
-    "github": "https://github.com/CommandOSSLabs/cmdocs-starter",
-    "links": []
-  },
-  "navigation": {
-    "tabs": [
+    "github": "https://github.com/vercel/next.js",
+    "links": [
       {
-        "tab": "Documentation",
-        "description": "Learn how to use this project",
-        "icon": "BookOpen",
-        "groups": [
+        "text": "Learn",
+        "href": "https://nextjs.org/learn",
+        "icon": "GraduationCap",
+        "active": "none",
+        "external": true
+      },
+      {
+        "type": "icon",
+        "text": "X",
+        "href": "https://x.com/nextjs",
+        "icon": "X",
+        "label": "Follow on X",
+        "external": true
+      },
+      {
+        "type": "menu",
+        "text": "Resources",
+        "icon": "MoreHorizontal",
+        "items": [
           {
-            "group": "Getting Started",
-            "pages": [
-              "index",
-              "quickstart"
-            ]
+            "text": "Showcase",
+            "href": "https://nextjs.org/showcase",
+            "description": "Built with Next.js",
+            "external": true
           },
           {
-            "group": "Guides",
-            "pages": [
-              "guides/writing-content",
-              "guides/components",
-              "guides/deploy"
-            ]
+            "text": "Blog",
+            "href": "https://nextjs.org/blog",
+            "description": "Latest news and updates",
+            "external": true
           }
         ]
       }
@@ -55,6 +62,75 @@
   },
   "footer": {
     "text": "Built with cmdocs",
-    "copyright": "© 2026 My Company"
+    "copyright": "© 2026 Vercel, Inc."
+  },
+  "navigation": {
+    "tabMode": "auto",
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "description": "Learn how to build with Next.js",
+        "icon": "BookOpen",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "index",
+              "installation",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Routing",
+            "pages": [
+              "routing/pages-and-layouts",
+              "routing/dynamic-routes",
+              "routing/middleware"
+            ]
+          },
+          {
+            "group": "Data Fetching",
+            "pages": [
+              "data-fetching/overview",
+              "data-fetching/caching"
+            ]
+          },
+          {
+            "group": "Styling",
+            "pages": [
+              "styling/overview"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "description": "Configuration, route handlers, and utilities",
+        "icon": "Code",
+        "groups": [
+          {
+            "group": "API",
+            "pages": [
+              "api/route-handlers",
+              "api/configuration"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Deployment",
+        "description": "Deploy your Next.js application",
+        "icon": "Rocket",
+        "groups": [
+          {
+            "group": "Deployment",
+            "pages": [
+              "deployment/overview",
+              "deployment/docker"
+            ]
+          }
+        ]
+      }
+    ]
   }
 }

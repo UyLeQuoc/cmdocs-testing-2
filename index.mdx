@@ -1,62 +1,109 @@
 ---
-title: Welcome
-description: Your new documentation site, built with cmdocs.
+title: Introduction
+description: Next.js is a React framework for building full-stack web applications.
 ---
 
-# Welcome
+# Welcome to Next.js
 
-This is your brand-new documentation site. Edit `index.mdx` to make it yours.
+Next.js is a React framework that gives you building blocks to create fast, full-stack web applications. It handles the tooling and configuration needed for React and provides structure, features, and optimizations for production.
 
-<Callout type="info">
-  This page is just a starting point. Replace it with whatever your project needs — an introduction, a feature tour, or a quickstart of your own.
-</Callout>
-
-## What you can do here
+## Why Next.js?
 
 <Cards>
-  <Card title="Write in MDX" description="Markdown plus components, no imports needed." href="/documentation/guides/writing-content" icon="FileText" />
-  <Card title="Use rich components" description="Callouts, cards, tabs, steps, file trees, diagrams." href="/documentation/guides/components" icon="Layers" />
-  <Card title="Configure your site" description="Theme, navigation, and SEO from one docs.json." href="/documentation/quickstart" icon="Settings" />
-  <Card title="Deploy anywhere" description="Push to deploy via the cmdocs dashboard or self-host." href="/documentation/guides/deploy" icon="Rocket" />
+  <Card title="Server Components" description="Render on the server for faster loads and smaller bundles." href="/documentation/data-fetching/overview" icon="Server" />
+  <Card title="File-Based Routing" description="Create routes by adding files to the app/ directory." href="/documentation/routing/pages-and-layouts" icon="FolderTree" />
+  <Card title="Built-in Optimizations" description="Automatic image, font, and script optimizations." href="/documentation/quickstart" icon="Zap" />
+  <Card title="Full-Stack Ready" description="API Routes, Server Actions, and middleware built in." href="/api-reference/api/route-handlers" icon="Layers" />
 </Cards>
 
-## How a cmdocs project is shaped
+## How it works
 
-Every cmdocs project is just a `docs.json` and some MDX files:
+<Mermaid chart="graph LR;
+    A[React Components] --> B[Next.js];
+    B --> C{Rendering};
+    C -->|Server| D[HTML + streaming];
+    C -->|Client| E[Interactive UI];
+    D --> F[Fast initial load];
+    E --> F;
+    F --> G[Production app];" />
+
+## Project structure
+
+A typical Next.js 15 project looks like this:
 
 <Files>
-  <Folder name="my-docs" defaultOpen>
-    <File name="docs.json" />
-    <File name="index.mdx" />
-    <File name="quickstart.mdx" />
-    <Folder name="guides" defaultOpen>
-      <File name="writing-content.mdx" />
-      <File name="components.mdx" />
-      <File name="deploy.mdx" />
+  <Folder name="my-app" defaultOpen>
+    <File name="next.config.ts" />
+    <File name="package.json" />
+    <File name="tsconfig.json" />
+    <Folder name="app" defaultOpen>
+      <File name="layout.tsx" />
+      <File name="page.tsx" />
+      <File name="globals.css" />
+      <Folder name="dashboard" defaultOpen>
+        <File name="page.tsx" />
+        <File name="layout.tsx" />
+      </Folder>
+      <Folder name="api" defaultOpen>
+        <Folder name="hello" defaultOpen>
+          <File name="route.ts" />
+        </Folder>
+      </Folder>
     </Folder>
     <Folder name="public" defaultOpen>
-      <File name="favicon.svg" />
-      <Folder name="logo" defaultOpen>
-        <File name="light.svg" />
-        <File name="dark.svg" />
-      </Folder>
+      <File name="favicon.ico" />
+      <File name="logo.svg" />
     </Folder>
   </Folder>
 </Files>
 
-## Three commands to remember
+## Quick example
 
-```bash
-npx cmdocs init my-docs   # scaffold a new project
-npx cmdocs dev            # run locally with hot reload
-npx cmdocs build          # produce a static site in dist/
-```
+<Tabs items={["Server Component", "Client Component"]}>
+  <Tab value="Server Component">
+    Server Components render on the server and send HTML to the client — no JavaScript needed on the client side.
 
-## Where to next
+    ```tsx title="app/page.tsx"
+    export default async function Page() {
+      const data = await fetch('https://api.example.com/posts')
+      const posts = await data.json()
+
+      return (
+        <ul>
+          {posts.map((post) => (
+            <li key={post.id}>{post.title}</li>
+          ))}
+        </ul>
+      )
+    }
+    ```
+  </Tab>
+  <Tab value="Client Component">
+    Client Components add interactivity. They render on the client and can use hooks, effects, and browser APIs.
+
+    ```tsx title="app/counter.tsx"
+    'use client'
+
+    import { useState } from 'react'
+
+    export default function Counter() {
+      const [count, setCount] = useState(0)
+
+      return (
+        <button onClick={() => setCount(count + 1)}>
+          Count: {count}
+        </button>
+      )
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Get started
 
 <Cards>
-  <Card title="Quickstart" description="Edit your first page and add a new one in 2 minutes." href="/documentation/quickstart" icon="Rocket" />
-  <Card title="Writing Content" description="MDX basics, frontmatter, and links." href="/documentation/guides/writing-content" icon="PencilLine" />
-  <Card title="Components" description="Every built-in component, with examples." href="/documentation/guides/components" icon="Layers" />
-  <Card title="Deploy" description="Ship your docs with the cmdocs dashboard or any static host." href="/documentation/guides/deploy" icon="Cloud" />
+  <Card title="Installation" description="Set up a new Next.js project from scratch." href="/documentation/installation" icon="Download" />
+  <Card title="Quickstart" description="Build your first page in under 5 minutes." href="/documentation/quickstart" icon="Rocket" />
+  <Card title="Routing" description="Learn how file-based routing works." href="/documentation/routing/pages-and-layouts" icon="Route" />
+  <Card title="Deployment" description="Ship to production on any platform." href="/deployment/deployment/overview" icon="Globe" />
 </Cards>

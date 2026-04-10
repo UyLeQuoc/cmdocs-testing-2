@@ -1,0 +1,34 @@
+# Next.js Documentation
+
+> Next.js is a React framework for building full-stack web applications. It provides file-based routing, server-side rendering, static site generation, and API routes out of the box.
+
+## Docs
+
+- [Introduction](https://docs.example.com/documentation/index): Overview, project structure, quick example
+- [Installation](https://docs.example.com/documentation/installation): Create a project, system requirements, troubleshooting
+- [Quickstart](https://docs.example.com/documentation/quickstart): Build pages, fetch data, add styling
+
+## Routing
+
+- [Pages and Layouts](https://docs.example.com/documentation/routing/pages-and-layouts): File-based routing, nested layouts, route groups
+- [Dynamic Routes](https://docs.example.com/documentation/routing/dynamic-routes): Dynamic segments, catch-all routes, generateStaticParams
+- [Middleware](https://docs.example.com/documentation/routing/middleware): Auth, redirects, headers, geolocation
+
+## Data Fetching
+
+- [Overview](https://docs.example.com/documentation/data-fetching/overview): Server vs client rendering, composing components
+- [Caching](https://docs.example.com/documentation/data-fetching/caching): Data cache, revalidation, route segment options
+
+## Styling
+
+- [Overview](https://docs.example.com/documentation/styling/overview): CSS Modules, Tailwind, global CSS, CSS-in-JS
+
+## API Reference
+
+- [Route Handlers](https://docs.example.com/api-reference/api/route-handlers): API endpoints, HTTP methods, dynamic routes
+- [Configuration](https://docs.example.com/api-reference/api/configuration): next.config.ts options, env variables, TypeScript
+
+## Deployment
+
+- [Overview](https://docs.example.com/deployment/deployment/overview): Vercel, Docker, static export, standalone
+- [Docker](https://docs.example.com/deployment/deployment/docker): Dockerfile, docker-compose, health checks, optimization

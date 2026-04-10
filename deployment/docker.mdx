@@ -1,0 +1,199 @@
+---
+title: Docker
+description: Containerize your Next.js app with a production-ready Dockerfile.
+---
+
+# Docker Deployment
+
+Deploy Next.js in a Docker container for any infrastructure — Kubernetes, AWS ECS, Google Cloud Run, or your own servers.
+
+## Prerequisites
+
+- Docker installed locally
+- `output: 'standalone'` in `next.config.ts`
+
+```ts title="next.config.ts"
+const nextConfig = {
+  output: 'standalone',
+}
+
+export default nextConfig
+```
+
+## Production Dockerfile
+
+<Steps>
+  <Step>
+    ### Create the Dockerfile
+
+    This multi-stage Dockerfile keeps the final image small (~120 MB):
+
+    ```dockerfile title="Dockerfile"
+    FROM node:20-alpine AS base
+
+    # --- Dependencies ---
+    FROM base AS deps
+    RUN apk add --no-cache libc6-compat
+    WORKDIR /app
+    COPY package.json package-lock.json* ./
+    RUN npm ci
+
+    # --- Build ---
+    FROM base AS builder
+    WORKDIR /app
+    COPY --from=deps /app/node_modules ./node_modules
+    COPY . .
+    RUN npm run build
+
+    # --- Production ---
+    FROM base AS runner
+    WORKDIR /app
+
+    ENV NODE_ENV=production
+    ENV NEXT_TELEMETRY_DISABLED=1
+
+    RUN addgroup --system --gid 1001 nodejs
+    RUN adduser --system --uid 1001 nextjs
+
+    COPY --from=builder /app/public ./public
+
+    # Standalone output
+    COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+    COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+    USER nextjs
+
+    EXPOSE 3000
+    ENV PORT=3000
+    ENV HOSTNAME="0.0.0.0"
+
+    CMD ["node", "server.js"]
+    ```
+  </Step>
+  <Step>
+    ### Add a `.dockerignore`
+
+    ```text title=".dockerignore"
+    node_modules
+    .next
+    .git
+    .gitignore
+    README.md
+    Dockerfile
+    docker-compose.yml
+    ```
+  </Step>
+  <Step>
+    ### Build and run
+
+    ```bash
+    docker build -t my-nextjs-app .
+    docker run -p 3000:3000 my-nextjs-app
+    ```
+
+    Open [http://localhost:3000](http://localhost:3000).
+  </Step>
+</Steps>
+
+## Docker Compose
+
+For development with additional services (database, Redis, etc.):
+
+```yaml title="docker-compose.yml"
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@db:5432/mydb
+    depends_on:
+      - db
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  pgdata:
+```
+
+```bash
+docker compose up --build
+```
+
+## Environment variables
+
+Pass environment variables at runtime:
+
+```bash
+docker run -p 3000:3000 \
+  -e DATABASE_URL="postgresql://..." \
+  -e API_SECRET="sk-..." \
+  my-nextjs-app
+```
+
+<Callout type="warn">
+  `NEXT_PUBLIC_*` variables are baked into the build at `next build` time. They cannot be changed at runtime. Server-only variables (without the prefix) can be passed at runtime with `-e`.
+</Callout>
+
+## Health checks
+
+Add a health check to your Docker run for orchestrators like Kubernetes or ECS:
+
+```dockerfile
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s \
+  CMD wget -qO- http://localhost:3000/api/health || exit 1
+```
+
+With a simple health endpoint:
+
+```ts title="app/api/health/route.ts"
+export async function GET() {
+  return Response.json({ status: 'ok', timestamp: new Date().toISOString() })
+}
+```
+
+## Image size optimization
+
+| Technique | Impact |
+|---|---|
+| Multi-stage build | Removes build tools from the final image |
+| `node:20-alpine` | ~50 MB vs ~350 MB for `node:20` |
+| `output: 'standalone'` | Bundles only the required `node_modules` |
+| `.dockerignore` | Excludes unnecessary files from the build context |
+
+<Callout type="info">
+  A well-optimized Next.js Docker image is typically **100–150 MB** — small enough for fast cold starts on serverless container platforms like Cloud Run or AWS Fargate.
+</Callout>
+
+## Troubleshooting
+
+<Accordions>
+  <Accordion title="Static files return 404">
+    The standalone server doesn't serve `public/` by default. Make sure you copy `public/` into the runner stage:
+
+    ```dockerfile
+    COPY --from=builder /app/public ./public
+    ```
+  </Accordion>
+  <Accordion title="Image optimization doesn't work">
+    The standalone output includes `sharp` for image optimization. If it's missing, install it explicitly:
+
+    ```dockerfile
+    RUN npm install sharp
+    ```
+  </Accordion>
+  <Accordion title="Container exits immediately">
+    Check that `HOSTNAME` is set to `"0.0.0.0"` — without it, the server only listens on `localhost`, which isn't accessible from outside the container.
+  </Accordion>
+  <Accordion title="Build is slow">
+    Add a `.dockerignore` to exclude `node_modules`, `.next`, and `.git` from the build context. This can cut build context transfer from minutes to seconds.
+  </Accordion>
+</Accordions>

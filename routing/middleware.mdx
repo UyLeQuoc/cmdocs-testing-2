@@ -1,0 +1,164 @@
+---
+title: Middleware
+description: Run code before a request is completed with Next.js middleware.
+---
+
+# Middleware
+
+Middleware runs **before** a request is completed. It lets you rewrite, redirect, modify headers, or respond directly — all at the edge, before your page or API route runs.
+
+## Quick start
+
+Create a `middleware.ts` file in the root of your project (next to `app/`):
+
+```ts title="middleware.ts"
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+
+export function middleware(request: NextRequest) {
+  // Redirect /old-path to /new-path
+  if (request.nextUrl.pathname === '/old-path') {
+    return NextResponse.redirect(new URL('/new-path', request.url))
+  }
+
+  return NextResponse.next()
+}
+```
+
+<Callout type="warn">
+  The middleware file must be at the **root** of your project — not inside `app/`. It runs for every matched route.
+</Callout>
+
+## Matching routes
+
+By default, middleware runs on every request. Use the `matcher` config to limit it:
+
+```ts title="middleware.ts"
+export const config = {
+  matcher: [
+    '/dashboard/:path*',
+    '/api/:path*',
+  ],
+}
+```
+
+<TypeTable
+  type={{
+    matcher: {
+      type: "string | string[]",
+      description: "Route patterns to match. Supports Next.js path patterns with :path* for catch-all.",
+    },
+  }}
+/>
+
+### Common patterns
+
+| Pattern | Matches |
+|---|---|
+| `'/dashboard/:path*'` | `/dashboard`, `/dashboard/settings`, `/dashboard/a/b` |
+| `'/api/:path*'` | All API routes |
+| `'/((?!api\|_next/static\|favicon.ico).*)'` | Everything except API, static files, and favicon |
+
+## Use cases
+
+<Tabs items={["Authentication", "Redirects", "Headers", "Geolocation"]}>
+  <Tab value="Authentication">
+    ```ts title="middleware.ts"
+    import { NextResponse } from 'next/server'
+    import type { NextRequest } from 'next/server'
+
+    export function middleware(request: NextRequest) {
+      const token = request.cookies.get('session')?.value
+
+      if (!token && request.nextUrl.pathname.startsWith('/dashboard')) {
+        return NextResponse.redirect(new URL('/login', request.url))
+      }
+
+      return NextResponse.next()
+    }
+
+    export const config = {
+      matcher: ['/dashboard/:path*'],
+    }
+    ```
+  </Tab>
+  <Tab value="Redirects">
+    ```ts title="middleware.ts"
+    import { NextResponse } from 'next/server'
+    import type { NextRequest } from 'next/server'
+
+    const redirects: Record<string, string> = {
+      '/docs': '/documentation',
+      '/blog/old-post': '/blog/new-post',
+    }
+
+    export function middleware(request: NextRequest) {
+      const target = redirects[request.nextUrl.pathname]
+      if (target) {
+        return NextResponse.redirect(new URL(target, request.url))
+      }
+      return NextResponse.next()
+    }
+    ```
+  </Tab>
+  <Tab value="Headers">
+    ```ts title="middleware.ts"
+    import { NextResponse } from 'next/server'
+    import type { NextRequest } from 'next/server'
+
+    export function middleware(request: NextRequest) {
+      const response = NextResponse.next()
+
+      // Add security headers
+      response.headers.set('X-Frame-Options', 'DENY')
+      response.headers.set('X-Content-Type-Options', 'nosniff')
+      response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+
+      // Add request ID for tracing
+      response.headers.set('X-Request-Id', crypto.randomUUID())
+
+      return response
+    }
+    ```
+  </Tab>
+  <Tab value="Geolocation">
+    ```ts title="middleware.ts"
+    import { NextResponse } from 'next/server'
+    import type { NextRequest } from 'next/server'
+
+    export function middleware(request: NextRequest) {
+      const country = request.geo?.country || 'US'
+      const city = request.geo?.city || 'San Francisco'
+
+      const response = NextResponse.next()
+      response.headers.set('X-User-Country', country)
+      response.headers.set('X-User-City', city)
+
+      return response
+    }
+    ```
+
+    <Callout type="info">
+      Geolocation data (`request.geo`) is available when deployed to Vercel or other edge platforms. It won't be populated in local development.
+    </Callout>
+  </Tab>
+</Tabs>
+
+## Execution order
+
+<Mermaid chart="graph LR;
+    A[Request] --> B[Middleware];
+    B --> C{Decision};
+    C -->|Redirect| D[New URL];
+    C -->|Rewrite| E[Different page];
+    C -->|Next| F[Route handler / Page];
+    F --> G[Response];" />
+
+1. `headers` from `next.config.js`
+2. `redirects` from `next.config.js`
+3. **Middleware** (`rewrites`, `redirects`, etc.)
+4. `beforeFiles` rewrites from `next.config.js`
+5. Filesystem routes (`public/`, `app/`, `pages/`)
+6. `afterFiles` rewrites from `next.config.js`
+7. Dynamic routes (`/[slug]`)
+8. `fallback` rewrites from `next.config.js`

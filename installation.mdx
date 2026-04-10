@@ -1,0 +1,226 @@
+---
+title: Installation
+description: Set up a new Next.js project with automatic configuration.
+---
+
+# Installation
+
+Next.js requires **Node.js 18.17** or later. It supports macOS, Windows, and Linux.
+
+## System requirements
+
+| Requirement | Minimum |
+|---|---|
+| **Node.js** | 18.17 or later |
+| **OS** | macOS, Windows, Linux |
+| **Disk space** | ~200 MB |
+
+## Create a new project
+
+<Steps>
+  <Step>
+    ### Run the create command
+
+    <Tabs items={["npx", "bunx", "pnpm", "yarn"]}>
+      <Tab value="npx">
+        ```bash
+        npx create-next-app@latest my-app
+        ```
+      </Tab>
+      <Tab value="bunx">
+        ```bash
+        bunx create-next-app@latest my-app
+        ```
+      </Tab>
+      <Tab value="pnpm">
+        ```bash
+        pnpm create next-app@latest my-app
+        ```
+      </Tab>
+      <Tab value="yarn">
+        ```bash
+        yarn create next-app@latest my-app
+        ```
+      </Tab>
+    </Tabs>
+
+    The CLI asks you a few questions:
+
+    ```
+    ✔ Would you like to use TypeScript? … Yes
+    ✔ Would you like to use ESLint? … Yes
+    ✔ Would you like to use Tailwind CSS? … Yes
+    ✔ Would you like your code inside a `src/` directory? … No
+    ✔ Would you like to use App Router? (recommended) … Yes
+    ✔ Would you like to use Turbopack for `next dev`? … Yes
+    ✔ Would you like to customize the import alias? … No
+    ```
+
+    <Callout type="info">
+      We recommend using **TypeScript** and **App Router** for all new projects. These are the defaults since Next.js 13.
+    </Callout>
+  </Step>
+  <Step>
+    ### Explore the generated project
+
+    The CLI scaffolds everything you need:
+
+    <Files>
+      <Folder name="my-app" defaultOpen>
+        <File name="next.config.ts" />
+        <File name="package.json" />
+        <File name="tsconfig.json" />
+        <File name=".eslintrc.json" />
+        <File name="tailwind.config.ts" />
+        <File name="postcss.config.mjs" />
+        <Folder name="app" defaultOpen>
+          <File name="layout.tsx" />
+          <File name="page.tsx" />
+          <File name="globals.css" />
+        </Folder>
+        <Folder name="public" defaultOpen>
+          <File name="next.svg" />
+          <File name="vercel.svg" />
+        </Folder>
+      </Folder>
+    </Files>
+
+    | File | Purpose |
+    |---|---|
+    | `app/layout.tsx` | Root layout — wraps every page |
+    | `app/page.tsx` | Home page (`/`) |
+    | `app/globals.css` | Global styles |
+    | `next.config.ts` | Next.js configuration |
+    | `public/` | Static assets served at `/` |
+  </Step>
+  <Step>
+    ### Start the dev server
+
+    <Tabs items={["npm", "bun", "pnpm", "yarn"]}>
+      <Tab value="npm">
+        ```bash
+        cd my-app
+        npm run dev
+        ```
+      </Tab>
+      <Tab value="bun">
+        ```bash
+        cd my-app
+        bun dev
+        ```
+      </Tab>
+      <Tab value="pnpm">
+        ```bash
+        cd my-app
+        pnpm dev
+        ```
+      </Tab>
+      <Tab value="yarn">
+        ```bash
+        cd my-app
+        yarn dev
+        ```
+      </Tab>
+    </Tabs>
+
+    Open [http://localhost:3000](http://localhost:3000) to see your app.
+  </Step>
+</Steps>
+
+## Manual installation
+
+If you prefer to set things up by hand, install `next`, `react`, and `react-dom`:
+
+<Tabs items={["npm", "bun", "pnpm"]}>
+  <Tab value="npm">
+    ```bash
+    npm install next@latest react@latest react-dom@latest
+    ```
+  </Tab>
+  <Tab value="bun">
+    ```bash
+    bun add next@latest react@latest react-dom@latest
+    ```
+  </Tab>
+  <Tab value="pnpm">
+    ```bash
+    pnpm add next@latest react@latest react-dom@latest
+    ```
+  </Tab>
+</Tabs>
+
+Then add to `package.json`:
+
+```json title="package.json"
+{
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  }
+}
+```
+
+Create the `app/` directory with a root layout and home page:
+
+```tsx title="app/layout.tsx"
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  )
+}
+```
+
+```tsx title="app/page.tsx"
+export default function Home() {
+  return <h1>Hello, Next.js!</h1>
+}
+```
+
+<Callout type="warn">
+  `app/layout.tsx` is required. Next.js won't start without a root layout.
+</Callout>
+
+## Troubleshooting
+
+<Accordions>
+  <Accordion title="Port 3000 is already in use">
+    Run on a different port:
+
+    ```bash
+    next dev --port 4000
+    ```
+  </Accordion>
+  <Accordion title="Module not found errors after install">
+    Delete `node_modules` and `package-lock.json` (or your lockfile), then reinstall:
+
+    ```bash
+    rm -rf node_modules package-lock.json
+    npm install
+    ```
+  </Accordion>
+  <Accordion title="TypeScript errors in a brand new project">
+    Make sure you're using Node.js 18.17 or later. Older versions don't support the `satisfies` keyword used by Next.js types.
+
+    ```bash
+    node -v
+    ```
+  </Accordion>
+  <Accordion title="Turbopack not working">
+    Turbopack is enabled by default with `next dev --turbopack` in Next.js 15. If you're on an older version, add the `--turbopack` flag to your `dev` script explicitly.
+  </Accordion>
+</Accordions>
+
+## Next step
+
+<Cards>
+  <Card title="Quickstart" description="Build, edit, and preview your first pages." href="/documentation/quickstart" icon="Rocket" />
+  <Card title="Project Structure" description="Learn how files map to routes." href="/documentation/routing/pages-and-layouts" icon="FolderTree" />
+</Cards>

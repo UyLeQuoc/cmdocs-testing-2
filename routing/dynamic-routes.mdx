@@ -1,0 +1,115 @@
+---
+title: Dynamic Routes
+description: Create routes with dynamic parameters like /posts/[id].
+---
+
+# Dynamic Routes
+
+When you don't know the exact route segment ahead of time, use dynamic routes. Wrap a folder name in square brackets to create a dynamic segment: `[param]`.
+
+## Convention
+
+| Pattern | Example URL | `params` |
+|---|---|---|
+| `app/posts/[id]/page.tsx` | `/posts/123` | `{ id: '123' }` |
+| `app/shop/[...slug]/page.tsx` | `/shop/a/b/c` | `{ slug: ['a', 'b', 'c'] }` |
+| `app/shop/[[...slug]]/page.tsx` | `/shop` or `/shop/a/b` | `{ slug: undefined }` or `{ slug: ['a', 'b'] }` |
+
+## Basic dynamic route
+
+```tsx title="app/posts/[id]/page.tsx"
+interface Props {
+  params: Promise<{ id: string }>
+}
+
+export default async function Post({ params }: Props) {
+  const { id } = await params
+
+  const res = await fetch(`https://api.example.com/posts/${id}`)
+  const post = await res.json()
+
+  return (
+    <article>
+      <h1>{post.title}</h1>
+      <p>{post.body}</p>
+    </article>
+  )
+}
+```
+
+<Callout type="info">
+  In Next.js 15, `params` is a **Promise**. You must `await` it before accessing its properties. This allows Next.js to optimize rendering.
+</Callout>
+
+## Generate static pages
+
+Use `generateStaticParams` to statically generate routes at build time instead of on-demand at request time:
+
+```tsx title="app/posts/[id]/page.tsx"
+export async function generateStaticParams() {
+  const posts = await fetch('https://api.example.com/posts').then((r) =>
+    r.json()
+  )
+
+  return posts.map((post: { id: number }) => ({
+    id: String(post.id),
+  }))
+}
+
+export default async function Post({ params }: Props) {
+  const { id } = await params
+  // ...
+}
+```
+
+## Params reference
+
+<TypeTable
+  type={{
+    params: {
+      type: "Promise<Record<string, string | string[]>>",
+      description: "An object containing the dynamic route parameters for the current route.",
+      required: true,
+    },
+    searchParams: {
+      type: "Promise<Record<string, string | string[] | undefined>>",
+      description: "An object containing the search parameters of the current URL.",
+    },
+  }}
+/>
+
+## Catch-all segments
+
+Use `[...slug]` to match any number of segments:
+
+<Files>
+  <Folder name="app" defaultOpen>
+    <Folder name="docs" defaultOpen>
+      <Folder name="[...slug]" defaultOpen>
+        <File name="page.tsx" />
+      </Folder>
+    </Folder>
+  </Folder>
+</Files>
+
+```tsx title="app/docs/[...slug]/page.tsx"
+interface Props {
+  params: Promise<{ slug: string[] }>
+}
+
+export default async function Docs({ params }: Props) {
+  const { slug } = await params
+  // /docs/a/b/c → slug = ['a', 'b', 'c']
+
+  return <h1>Docs: {slug.join(' / ')}</h1>
+}
+```
+
+| URL | `slug` value |
+|---|---|
+| `/docs/getting-started` | `['getting-started']` |
+| `/docs/api/auth/config` | `['api', 'auth', 'config']` |
+
+<Callout type="warn">
+  `[...slug]` does **not** match the parent route (`/docs`). Use `[[...slug]]` (optional catch-all) if you also need to match the parent.
+</Callout>

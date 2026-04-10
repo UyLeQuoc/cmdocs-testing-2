@@ -1,0 +1,148 @@
+---
+title: Deployment
+description: Deploy your Next.js application to production.
+---
+
+# Deployment
+
+Next.js can be deployed anywhere that supports Node.js, or exported as a fully static site. Choose the approach that fits your infrastructure.
+
+## Deployment options
+
+<Cards>
+  <Card title="Vercel" description="Zero-config deployment from the creators of Next.js." href="/deployment/deployment/docker" icon="Cloud" />
+  <Card title="Docker" description="Containerize your app for any infrastructure." href="/deployment/deployment/docker" icon="Container" />
+  <Card title="Static Export" description="Generate static HTML for any static host." href="/deployment/deployment/docker" icon="FileText" />
+  <Card title="Node.js Server" description="Run a standalone Node.js server." href="/deployment/deployment/docker" icon="Server" />
+</Cards>
+
+## Build your app
+
+```bash
+next build
+```
+
+This produces an optimized production build in `.next/`:
+
+<Files>
+  <Folder name=".next" defaultOpen>
+    <Folder name="server" defaultOpen>
+      <File name="app" />
+      <File name="chunks" />
+    </Folder>
+    <Folder name="static" defaultOpen>
+      <File name="chunks" />
+      <File name="css" />
+      <File name="media" />
+    </Folder>
+    <File name="build-manifest.json" />
+    <File name="routes-manifest.json" />
+  </Folder>
+</Files>
+
+## Deploy to Vercel
+
+The fastest way to deploy Next.js:
+
+<Steps>
+  <Step>
+    Push your code to GitHub, GitLab, or Bitbucket.
+  </Step>
+  <Step>
+    Import the project at [vercel.com/new](https://vercel.com/new).
+  </Step>
+  <Step>
+    Vercel auto-detects Next.js and configures the build. Click **Deploy**.
+  </Step>
+  <Step>
+    Your app is live with HTTPS, a CDN, and automatic preview deployments for every PR.
+  </Step>
+</Steps>
+
+<Callout type="info">
+  Vercel supports all Next.js features out of the box, including Server Components, middleware, ISR, and image optimization. No additional configuration needed.
+</Callout>
+
+## Standalone output
+
+For Docker or self-hosting, use the `standalone` output mode. It bundles only the files needed to run your app:
+
+```ts title="next.config.ts"
+const nextConfig = {
+  output: 'standalone',
+}
+
+export default nextConfig
+```
+
+After `next build`, the standalone output appears at `.next/standalone/`:
+
+```bash
+node .next/standalone/server.js
+```
+
+<Callout type="warn">
+  The standalone server doesn't serve the `public/` or `.next/static/` directories. Copy them manually or serve them from a CDN.
+</Callout>
+
+## Static export
+
+Export your app as static HTML for deployment to any static host (S3, GitHub Pages, Nginx):
+
+```ts title="next.config.ts"
+const nextConfig = {
+  output: 'export',
+}
+
+export default nextConfig
+```
+
+<Tabs items={["Vercel", "Netlify", "GitHub Pages", "S3 / Nginx"]}>
+  <Tab value="Vercel">
+    ```bash
+    npx vercel deploy out --prod
+    ```
+  </Tab>
+  <Tab value="Netlify">
+    ```bash
+    npx netlify deploy --dir=out --prod
+    ```
+  </Tab>
+  <Tab value="GitHub Pages">
+    Add to your GitHub Actions workflow:
+
+    ```yaml
+    - run: npm run build
+    - uses: actions/upload-pages-artifact@v3
+      with:
+        path: out
+    - uses: actions/deploy-pages@v4
+    ```
+  </Tab>
+  <Tab value="S3 / Nginx">
+    ```bash
+    aws s3 sync out s3://my-bucket --delete
+    ```
+  </Tab>
+</Tabs>
+
+<Callout type="warn">
+  Static export does not support dynamic features like middleware, Server Components with request-time data, or API routes. Use `standalone` mode if you need those.
+</Callout>
+
+## Which should I pick?
+
+<Accordions>
+  <Accordion title="I want the simplest deployment possible">
+    Use **Vercel**. Push to GitHub, import the project, done. Zero configuration.
+  </Accordion>
+  <Accordion title="I need to run on my own infrastructure">
+    Use **Docker** with `output: 'standalone'`. See the [Docker guide](/deployment/deployment/docker) for a production-ready Dockerfile.
+  </Accordion>
+  <Accordion title="My app is fully static (no server-side rendering)">
+    Use `output: 'export'`. Upload the `out/` directory to any static host — S3, GitHub Pages, Cloudflare Pages, or Nginx.
+  </Accordion>
+  <Accordion title="I'm migrating from another framework">
+    Start with Vercel or Docker. Both support incremental adoption — you can migrate page by page.
+  </Accordion>
+</Accordions>

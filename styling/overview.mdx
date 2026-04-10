@@ -1,0 +1,196 @@
+---
+title: Styling
+description: CSS Modules, Tailwind CSS, CSS-in-JS, and other styling approaches in Next.js.
+---
+
+# Styling
+
+Next.js supports several styling methods out of the box. Choose the approach that fits your team and project.
+
+## Approaches
+
+<Cards>
+  <Card title="CSS Modules" description="Scoped CSS with automatic class name generation." icon="FileCode" />
+  <Card title="Tailwind CSS" description="Utility-first CSS framework, built-in support." icon="Palette" />
+  <Card title="Global CSS" description="Traditional stylesheets imported in the root layout." icon="Globe" />
+  <Card title="CSS-in-JS" description="Write CSS in JavaScript with libraries like styled-components." icon="Code" />
+</Cards>
+
+## CSS Modules
+
+CSS Modules automatically scope styles to the component by generating unique class names. Use the `.module.css` extension:
+
+```css title="app/dashboard/dashboard.module.css"
+.container {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  min-height: 100vh;
+}
+
+.sidebar {
+  background: #f8f9fa;
+  padding: 2rem;
+  border-right: 1px solid #eaeaea;
+}
+
+.content {
+  padding: 2rem;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+```
+
+```tsx title="app/dashboard/page.tsx"
+import styles from './dashboard.module.css'
+
+export default function Dashboard() {
+  return (
+    <div className={styles.container}>
+      <aside className={styles.sidebar}>
+        <h2 className={styles.title}>Navigation</h2>
+        {/* sidebar links */}
+      </aside>
+      <main className={styles.content}>
+        <h1 className={styles.title}>Dashboard</h1>
+        {/* page content */}
+      </main>
+    </div>
+  )
+}
+```
+
+<Callout type="info">
+  CSS Modules work in both Server and Client Components. Styles are extracted at build time — no runtime overhead.
+</Callout>
+
+## Tailwind CSS
+
+Tailwind is configured automatically when you select it during `create-next-app`. To add it to an existing project:
+
+<Steps>
+  <Step>
+    ### Install Tailwind
+
+    <Tabs items={["npm", "bun", "pnpm"]}>
+      <Tab value="npm">
+        ```bash
+        npm install -D tailwindcss @tailwindcss/postcss postcss
+        ```
+      </Tab>
+      <Tab value="bun">
+        ```bash
+        bun add -D tailwindcss @tailwindcss/postcss postcss
+        ```
+      </Tab>
+      <Tab value="pnpm">
+        ```bash
+        pnpm add -D tailwindcss @tailwindcss/postcss postcss
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+  <Step>
+    ### Configure PostCSS
+
+    ```js title="postcss.config.mjs"
+    const config = {
+      plugins: {
+        "@tailwindcss/postcss": {},
+      },
+    };
+    export default config;
+    ```
+  </Step>
+  <Step>
+    ### Import Tailwind in your CSS
+
+    ```css title="app/globals.css"
+    @import "tailwindcss";
+    ```
+  </Step>
+  <Step>
+    ### Start using Tailwind classes
+
+    ```tsx title="app/page.tsx"
+    export default function Home() {
+      return (
+        <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
+          <h1 className="text-5xl font-bold text-white">
+            Hello, Tailwind!
+          </h1>
+        </main>
+      )
+    }
+    ```
+  </Step>
+</Steps>
+
+## Global CSS
+
+Import a global stylesheet in your root layout. Only `app/layout.tsx` can import global CSS:
+
+```css title="app/globals.css"
+:root {
+  --foreground: #171717;
+  --background: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground: #ededed;
+    --background: #0a0a0a;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: system-ui, -apple-system, sans-serif;
+  line-height: 1.6;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+```
+
+```tsx title="app/layout.tsx"
+import './globals.css'
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  )
+}
+```
+
+<Callout type="warn">
+  Global CSS can only be imported in `app/layout.tsx`. Importing it in other components will cause a build error. Use CSS Modules for component-scoped styles.
+</Callout>
+
+## Comparison
+
+| Feature | CSS Modules | Tailwind | Global CSS | CSS-in-JS |
+|---|---|---|---|---|
+| Scoping | ✅ Automatic | ✅ Utility classes | ❌ Global | ✅ Component-level |
+| Server Components | ✅ | ✅ | ✅ | ⚠️ Limited |
+| Bundle size | Small | Small (purged) | Varies | Larger |
+| Runtime overhead | None | None | None | Yes |
+| Learning curve | Low | Medium | Low | Medium |
+
+<Callout type="info">
+  For Server Components, use CSS Modules, Tailwind, or Global CSS. Most CSS-in-JS libraries require `'use client'` because they inject styles at runtime.
+</Callout>
