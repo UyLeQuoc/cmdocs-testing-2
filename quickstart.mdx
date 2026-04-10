@@ -1,0 +1,158 @@
+---
+title: Quickstart
+description: Edit a page, add a new one, and ship in under 5 minutes.
+---
+
+# Quickstart
+
+By the end of this page you'll have edited a page, added a new one, and produced a production build.
+
+## Prerequisites
+
+- **Node.js 18+** or **Bun 1.0+**
+- A terminal
+
+## 1. Run the dev server
+
+```bash
+npx cmdocs dev
+```
+
+Open [http://localhost:3000](http://localhost:3000). You'll see this site, with hot reload enabled — every save updates the browser automatically.
+
+## 2. Edit a page
+
+Open `index.mdx` and change the title:
+
+```mdx title="index.mdx"
+---
+title: My First Docs
+description: Documentation for my project.
+---
+
+# Hello from my docs
+
+Welcome to my new documentation site.
+
+<Callout type="info">
+  Anything inside an MDX file is rendered as a page.
+</Callout>
+```
+
+Save the file. The browser updates instantly.
+
+## 3. Add a new page
+
+<Steps>
+  <Step>
+    ### Create the MDX file
+
+    Add a new file at `guides/setup.mdx`:
+
+    ```mdx title="guides/setup.mdx"
+    ---
+    title: Setup Guide
+    description: How to set up the project.
+    ---
+
+    # Setup
+
+    Follow these steps to get started.
+
+    <Steps>
+      <Step>Install dependencies</Step>
+      <Step>Configure environment variables</Step>
+      <Step>Run the dev server</Step>
+    </Steps>
+    ```
+  </Step>
+  <Step>
+    ### Register it in `docs.json`
+
+    Add the new page to the `pages` array under your navigation group:
+
+    ```json title="docs.json"
+    {
+      "navigation": {
+        "tabs": [{
+          "tab": "Documentation",
+          "groups": [{
+            "group": "Guides",
+            "pages": [
+              "guides/writing-content",
+              "guides/components",
+              "guides/deploy",
+              "guides/setup"
+            ]
+          }]
+        }]
+      }
+    }
+    ```
+
+    <Callout type="info">
+      Page slugs are file paths **without** the `.mdx` extension.
+    </Callout>
+  </Step>
+  <Step>
+    ### Verify
+
+    The new page appears in your sidebar and is reachable at `/documentation/guides/setup`.
+  </Step>
+</Steps>
+
+## 4. Build for production
+
+When you're ready to deploy:
+
+```bash
+npx cmdocs build
+```
+
+This produces a fully static site in the `dist/` directory. Upload it to any static host:
+
+<Tabs items={["Vercel", "Netlify", "S3 / nginx"]}>
+  <Tab value="Vercel">
+    ```bash
+    npx vercel deploy dist
+    ```
+  </Tab>
+  <Tab value="Netlify">
+    ```bash
+    npx netlify deploy --dir=dist --prod
+    ```
+  </Tab>
+  <Tab value="S3 / nginx">
+    ```bash
+    aws s3 sync dist s3://my-docs-bucket --delete
+    ```
+  </Tab>
+</Tabs>
+
+Or skip the manual upload and let the [cmdocs dashboard](/documentation/guides/deploy) do it on every push.
+
+## CLI reference
+
+| Command | What it does |
+|---|---|
+| `cmdocs init [name]` | Scaffold a new documentation project |
+| `cmdocs dev` | Start the local dev server with hot reload |
+| `cmdocs build` | Build a static site into `dist/` |
+
+### Common options
+
+```bash
+# Dev server on a custom port
+cmdocs dev --port 4000
+
+# Build from a specific source directory
+cmdocs build --source ./my-docs --output ./dist
+```
+
+## Next steps
+
+<Cards>
+  <Card title="Writing Content" description="MDX basics, frontmatter, and links." href="/documentation/guides/writing-content" icon="PencilLine" />
+  <Card title="Components" description="Every built-in component, with examples." href="/documentation/guides/components" icon="Layers" />
+  <Card title="Deploy" description="Ship to the cmdocs dashboard or any static host." href="/documentation/guides/deploy" icon="Cloud" />
+</Cards>

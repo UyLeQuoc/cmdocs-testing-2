@@ -1,0 +1,140 @@
+---
+title: Deploy
+description: Ship your docs with the cmdocs dashboard or any static host.
+---
+
+# Deploy
+
+Every cmdocs site is a **fully static export** — HTML, CSS, JS, and your assets. You have two paths to ship it.
+
+<Cards>
+  <Card title="cmdocs Dashboard" description="Connect a Git repo, push to deploy. Builds, hosting, and HTTPS handled for you." icon="Cloud" />
+  <Card title="Self-hosted" description="Run cmdocs build yourself and upload dist/ to any static host." icon="Server" />
+</Cards>
+
+## Path 1 — cmdocs Dashboard
+
+The fastest way to ship. Sign in with GitHub, point cmdocs at a repository, and every push to your tracked branch produces a new live deployment.
+
+### How it works
+
+<Mermaid chart="sequenceDiagram
+    participant Dev as You
+    participant GH as GitHub
+    participant API as cmdocs API
+    participant W as Build Worker
+    participant CDN as Static Router
+    Dev->>GH: git push main
+    GH->>API: webhook (HMAC verified)
+    API->>W: enqueue build
+    W->>GH: clone repo
+    W->>W: cmdocs build
+    W->>API: upload artifacts
+    API->>CDN: publish
+    CDN-->>Dev: live at subdomain" />
+
+### Walkthrough
+
+<Steps>
+  <Step>
+    **Sign in** at [cmdocs.sh](https://cmdocs.sh) with GitHub.
+  </Step>
+  <Step>
+    **Install the cmdocs GitHub App** and grant access to the repos you want to deploy.
+  </Step>
+  <Step>
+    **Create a project** and select your docs repository.
+  </Step>
+  <Step>
+    **Watch the first build** stream live in the dashboard. When it turns green, your site is live at `<slug>.cmdocs.app`.
+  </Step>
+  <Step>
+    **Push to deploy.** Every commit to the tracked branch creates a new deployment automatically.
+  </Step>
+</Steps>
+
+<Callout type="info">
+  Need a custom domain? Add it under **Project → Settings → Domains** and follow the DNS instructions.
+</Callout>
+
+## Path 2 — Self-hosted
+
+Run the build yourself and ship the output to any static host.
+
+```bash
+npx cmdocs build
+```
+
+This produces a directory of static files:
+
+<Files>
+  <Folder name="dist" defaultOpen>
+    <File name="index.html" />
+    <File name="quickstart.html" />
+    <Folder name="guides" defaultOpen>
+      <File name="writing-content.html" />
+    </Folder>
+    <Folder name="_next" defaultOpen>
+      <Folder name="static" defaultOpen>
+        <File name="chunks/..." />
+        <File name="css/..." />
+      </Folder>
+    </Folder>
+    <Folder name="logo" defaultOpen>
+      <File name="light.svg" />
+      <File name="dark.svg" />
+    </Folder>
+    <File name="llms.txt" />
+    <File name="llms-full.txt" />
+    <File name="sitemap.xml" />
+  </Folder>
+</Files>
+
+Upload `dist/` to any static host:
+
+<Tabs items={["Vercel", "Netlify", "Cloudflare Pages", "S3 / nginx"]}>
+  <Tab value="Vercel">
+    ```bash
+    npx vercel deploy dist --prod
+    ```
+  </Tab>
+  <Tab value="Netlify">
+    ```bash
+    npx netlify deploy --dir=dist --prod
+    ```
+  </Tab>
+  <Tab value="Cloudflare Pages">
+    ```bash
+    npx wrangler pages deploy dist
+    ```
+  </Tab>
+  <Tab value="S3 / nginx">
+    ```bash
+    aws s3 sync dist s3://my-docs-bucket --delete
+    ```
+  </Tab>
+</Tabs>
+
+## Which should I pick?
+
+<Accordions>
+  <Accordion title="I just want my docs online with the least fuss">
+    Use the **cmdocs Dashboard**. Sign in with GitHub, click your repo, done.
+  </Accordion>
+  <Accordion title="My docs live in a private monorepo">
+    Both paths work. The dashboard supports private repos via the GitHub App. For self-hosted, run `cmdocs build` in CI and upload `dist/` to your host.
+  </Accordion>
+  <Accordion title="I have a custom CDN setup or compliance requirements">
+    Self-host. cmdocs only produces static files — no runtime dependencies, nothing phones home.
+  </Accordion>
+  <Accordion title="Can I switch later?">
+    Yes — the output is the same either way. You can move from dashboard to self-hosted (or back) at any time without changing your content.
+  </Accordion>
+</Accordions>
+
+## What's next
+
+<Cards>
+  <Card title="Writing Content" description="MDX basics for your next page." href="/documentation/guides/writing-content" icon="PencilLine" />
+  <Card title="Components" description="Every built-in component, with examples." href="/documentation/guides/components" icon="Layers" />
+</Cards>

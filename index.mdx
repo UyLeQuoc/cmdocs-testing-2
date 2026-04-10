@@ -1,0 +1,62 @@
+---
+title: Welcome
+description: Your new documentation site, built with cmdocs.
+---
+
+# Welcome
+
+This is your brand-new documentation site. Edit `index.mdx` to make it yours.
+
+<Callout type="info">
+  This page is just a starting point. Replace it with whatever your project needs — an introduction, a feature tour, or a quickstart of your own.
+</Callout>
+
+## What you can do here
+
+<Cards>
+  <Card title="Write in MDX" description="Markdown plus components, no imports needed." href="/documentation/guides/writing-content" icon="FileText" />
+  <Card title="Use rich components" description="Callouts, cards, tabs, steps, file trees, diagrams." href="/documentation/guides/components" icon="Layers" />
+  <Card title="Configure your site" description="Theme, navigation, and SEO from one docs.json." href="/documentation/quickstart" icon="Settings" />
+  <Card title="Deploy anywhere" description="Push to deploy via the cmdocs dashboard or self-host." href="/documentation/guides/deploy" icon="Rocket" />
+</Cards>
+
+## How a cmdocs project is shaped
+
+Every cmdocs project is just a `docs.json` and some MDX files:
+
+<Files>
+  <Folder name="my-docs" defaultOpen>
+    <File name="docs.json" />
+    <File name="index.mdx" />
+    <File name="quickstart.mdx" />
+    <Folder name="guides" defaultOpen>
+      <File name="writing-content.mdx" />
+      <File name="components.mdx" />
+      <File name="deploy.mdx" />
+    </Folder>
+    <Folder name="public" defaultOpen>
+      <File name="favicon.svg" />
+      <Folder name="logo" defaultOpen>
+        <File name="light.svg" />
+        <File name="dark.svg" />
+      </Folder>
+    </Folder>
+  </Folder>
+</Files>
+
+## Three commands to remember
+
+```bash
+npx cmdocs init my-docs   # scaffold a new project
+npx cmdocs dev            # run locally with hot reload
+npx cmdocs build          # produce a static site in dist/
+```
+
+## Where to next
+
+<Cards>
+  <Card title="Quickstart" description="Edit your first page and add a new one in 2 minutes." href="/documentation/quickstart" icon="Rocket" />
+  <Card title="Writing Content" description="MDX basics, frontmatter, and links." href="/documentation/guides/writing-content" icon="PencilLine" />
+  <Card title="Components" description="Every built-in component, with examples." href="/documentation/guides/components" icon="Layers" />
+  <Card title="Deploy" description="Ship your docs with the cmdocs dashboard or any static host." href="/documentation/guides/deploy" icon="Cloud" />
+</Cards>
